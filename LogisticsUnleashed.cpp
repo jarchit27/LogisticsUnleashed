@@ -11,7 +11,7 @@ using namespace std;
 
 const int INF = 1e9;
 
-int N, T, M, K, F;
+int number_of_deliveries, number_of_nodes, number_of_roads, number_of_fuel_stations, fuel_tank_capacity;
 vector<int> hubs, houses, fuel_stations;
 vector<vector<int>> dist, next_node;
 unordered_map<int, unordered_map<int, int>> edge_map;
@@ -19,15 +19,15 @@ unordered_set<int> fuel_station_set;
 
 // Floyd-Warshall Algorithm
 void floyd_warshall(const vector<vector<pair<int, int>>>& graph) {
-    dist.assign(T, vector<int>(T, INF));
-    next_node.assign(T, vector<int>(T, -1));
+    dist.assign(number_of_nodes, vector<int>(number_of_nodes, INF));
+    next_node.assign(number_of_nodes, vector<int>(number_of_nodes, -1));
     
-    for (int u = 0; u < T; ++u) {
+    for (int u = 0; u < number_of_nodes; ++u) {
         dist[u][u] = 0;
         next_node[u][u] = u;
     }
     
-    for (int u = 0; u < T; ++u) {
+    for (int u = 0; u < number_of_nodes; ++u) {
         for (int i = 0; i < graph[u].size(); ++i) {
             int v = graph[u][i].first;
             int cost = graph[u][i].second;
@@ -35,11 +35,10 @@ void floyd_warshall(const vector<vector<pair<int, int>>>& graph) {
             next_node[u][v] = v;
         }
     }
-    for (int k = 0; k < T; ++k) {
-        for (int i = 0; i < T; ++i) {
-            for (int j = 0; j < T; ++j) {
-                if (dist[i][k] < INF && dist[k][j] < INF &&
-                    dist[i][j] > dist[i][k] + dist[k][j]) {
+    for (int k = 0; k < number_of_nodes; ++k) {
+        for (int i = 0; i < number_of_nodes; ++i) {
+            for (int j = 0; j < number_of_nodes; ++j) {
+                if (dist[i][k] < INF && dist[k][j] < INF && dist[i][j] > dist[i][k] + dist[k][j]) {
                     dist[i][j] = dist[i][k] + dist[k][j];
                     next_node[i][j] = next_node[i][k];
                 }
@@ -89,26 +88,26 @@ bool append_path_with_fuel(vector<int>& route, int from, int to, int& fuel) {
         if (cost > fuel) return false;
         fuel -= cost;
         route.push_back(v);
-        if (fuel_station_set.count(v)) fuel = F;
+        if (fuel_station_set.count(v)) fuel = fuel_tank_capacity;
     }
     return true;
 }
 
 int main() {
-    cin >> N >> T >> M >> K >> F;
-    hubs.resize(N);
-    houses.resize(N);
-    fuel_stations.resize(K);
+    cin >> number_of_deliveries >> number_of_nodes >> number_of_roads >> number_of_fuel_stations >> fuel_tank_capacity;
+    hubs.resize(number_of_deliveries);
+    houses.resize(number_of_deliveries);
+    fuel_stations.resize(number_of_fuel_stations);
 
-    for (int i = 0; i < N; ++i) cin >> hubs[i];
-    for (int i = 0; i < N; ++i) cin >> houses[i];
-    for (int i = 0; i < K; ++i) {
+    for (int i = 0; i < number_of_deliveries; ++i) cin >> hubs[i];
+    for (int i = 0; i < number_of_deliveries; ++i) cin >> houses[i];
+    for (int i = 0; i < number_of_fuel_stations; ++i) {
         cin >> fuel_stations[i];
         fuel_station_set.insert(fuel_stations[i]);
     }
 
-    vector<vector<pair<int, int>>> graph(T);
-    for (int i = 0; i < M; ++i) {
+    vector<vector<pair<int, int>>> graph(number_of_nodes);
+    for (int i = 0; i < number_of_roads; ++i) {
         int u, v, c;
         cin >> u >> v >> c;
         graph[u].push_back(make_pair(v, c));
@@ -124,11 +123,11 @@ int main() {
 
     unordered_set<int> visited_hubs, visited_houses;
     unordered_map<int, int> hub_for_house;
-    for (int i = 0; i < N; ++i) hub_for_house[houses[i]] = hubs[i];
+    for (int i = 0; i < number_of_deliveries; ++i) hub_for_house[houses[i]] = hubs[i];
 
     vector<int> route;
     int current = start_hub;
-    int fuel = F;
+    int fuel = fuel_tank_capacity;
     route.push_back(current);
     visited_hubs.insert(current);
 
